@@ -1,17 +1,68 @@
 {
   "images": [
     {
-      "id": "getty123",
-      "embedUrl": "https://embed.gettyimages.com/embed/123456789",
-      "html": "<iframe src='https://embed.gettyimages.com/embed/123456789' frameborder='0' scrolling='no' width='150' height='150'></iframe>",
-      "flashDuration": 2.5,
-      "category": "abstract"
+      "id": "yyR2wRaTSaBrbbBretUh0A",
+      "sig": "Q6tZ2Ykoi3T0XpN5fMyFAkqeOwX3JD3z4GAM6IsRkCI=",
+      "items": "2240388139"
+    },
+    {
+      "id": "uPrS6Db9TABPMsbXlCTTvg",
+      "sig": "Zco_V2BXjeG2WoVapxnunT-DGTZYHl21W626Jec35LA=",
+      "items": "2266998132"
+    },
+    {
+      "id": "elAIkgkXRP9bcTLDHal_IA",
+      "sig": "iyQfg40tsVlMflscM570Knx58hKhYmI_yq1URTHtUuI=",
+      "items": "823023052"
+    },
+    {
+      "id": "aqfkjImcQyhfUEvLV5FIGw",
+      "sig": "6siBEWbjUIxsw2qSF-IT2kAfkqYIjTeKtBCf4JjvL6M=",
+      "items": "1711781857"
+    },
+    {
+      "id": "hd6vBnA3QQ9hSRIhhNPWSQ",
+      "sig": "UGRbvMxiliNaVIBmGGW8A7HNaiLB025XxYHMCfUbDx8=",
+      "items": "2197696146"
+    },
+    {
+      "id": "2ZbCaZBFQwtVaxRvjcYIKA",
+      "sig": "7yhloJZ4_5Xz7kNUoGHwaGHt8W9Y8nPwlEcjr5pARpc=",
+      "items": "2240177304"
+    },
+    {
+      "id": "zZTq1vBoQkVZYlE0U46ByQ",
+      "sig": "J6k0KNpri4Gdv6ZnZcQISjagbaLobfQQofEOfyWhabo=",
+      "items": "507783258"
+    },
+    {
+      "id": "kEwzCiBITd5LuVgT0EDjhA",
+      "sig": "Bdp9yK6l2JNXEqUkAG0JgVlCd5B48Zn7eiOrZ6ydJIc=",
+      "items": "72478008"
+    },
+    {
+      "id": "MxMPqF0CTElFwnd-2he7Qg",
+      "sig": "BkdbJanrIrJn1w69eJX197DctSHwpVeKScZ8sQVeBPA=",
+      "items": "2197509047"
+    },
+    {
+      "id": "KCxG8bJrRWxeET361fniUw",
+      "sig": "f_njjIQAYpaY4TiDZKH49oxdd-yKwQfghAL5ZT-QSOU=",
+      "items": "2196449112"
+    },
+    {
+      "id": "GTTE3_zQT3tGF5d7llIIsA",
+      "sig": "HUq5SOkul26uv6EmPi6DDqz-XZepn6XTEArbKOu4BVw=",
+      "items": "2197701197"
     }
   ],
   "settings": {
-    "beatSensitivity": 0.7,
-    "maxConcurrent": 15,
-    "flashDuration": 2.0,
-    "colorScheme": "monochrome"
-  }
+    "beatSensitivity": 0.65,
+    "flashDuration": 0.3,
+    "maxConcurrent": 2
+  },
+  "playlist": [
+    "01 - Gulch - Monkey Gone To Heaven.mp3",
+    "01 - fakemink - Music and Me.mp3"
+  ]
 }

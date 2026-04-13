@@ -1,206 +1,259 @@
-<div id="audio-controls">
-    <label for="file-input" class="file-label">Choose Music</label>
-    <input type="file" id="file-input" accept="audio/*">
-    <button id="play-btn">Play</button>
-    <div id="beat-indicator"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revolution is Music to My Ears</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #panels {
+      display: none;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .panel {
+      display: inline-block;
+      width: 50%;
+      height: 100%;
+      vertical-align: top;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel .gie-widget-container {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div id="panels">
+  <div class="panel" id="panel-left"></div>
+  <div class="panel" id="panel-right"></div>
 </div>
 
+<audio id="audio-player" preload="auto"></audio>
+
+<!-- Getty's official widget script -->
+<script src="https://embed-cdn.gettyimages.com/widgets.js" charset="utf-8" async></script>
+
 <script>
-    class MusicVisualizer {
-        constructor() {
-            this.container = document.getElementById('visualizer-container');
-            this.audioContext = null;
-            this.analyser = null;
-            this.dataArray = null;
-            this.source = null;
-            this.audio = null;
-            this.isPlaying = false;
-            this.images = [];
-            this.settings = {
-                beatSensitivity: 0.7,
-                maxConcurrent: 15,
-                flashDuration: 2.5
-            };
-            
-            this.initializeAudio();
-            this.loadConfig();
-            this.setupEventListeners();
-        }
-        
-        async initializeAudio() {
-            try {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                this.analyser = this.audioContext.createAnalyser();
-                this.analyser.fftSize = 256;
-                const bufferLength = this.analyser.frequencyBinCount;
-                this.dataArray = new Uint8Array(bufferLength);
-            } catch (error) {
-                console.error('Audio initialization failed:', error);
-            }
-        }
-        
-        async loadConfig() {
-            try {
-                // Try to load config from GitHub repo
-                const configUrl = 'https://raw.githubusercontent.com/yourusername/your-repo/main/config.json';
-                const response = await fetch(configUrl);
-                
-                if (response.ok) {
-                    const config = await response.json();
-                    this.images = config.images || [];
-                    this.settings = { ...this.settings, ...config.settings };
-                    console.log('Loaded config with', this.images.length, 'images');
-                } else {
-                    // Fallback to default config
-                    this.loadDefaultConfig();
-                }
-            } catch (error) {
-                console.log('Could not load remote config, using default:', error);
-                this.loadDefaultConfig();
-            } finally {
-                // Hide loading message
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-        
-        loadDefaultConfig() {
-            // Default configuration with placeholder images
-            this.images = [
-                {
-                    id: 'placeholder1',
-                    embedUrl: 'https://embed.gettyimages.com/embed/placeholder1',
-                    html: '<div style="width: 150px; height: 150px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border-radius: 10px;"></div>',
-                    flashDuration: 2.5
-                },
-                {
-                    id: 'placeholder2',
-                    embedUrl: 'https://embed.gettyimages.com/embed/placeholder2',
-                    html: '<div style="width: 120px; height: 120px; background: linear-gradient(45deg, #a8e6cf, #ffd93d); border-radius: 15px;"></div>',
-                    flashDuration: 1.8
-                }
-            ];
-            console.log('Loaded default config with', this.images.length, 'images');
-        }
-        
-        setupEventListeners() {
-            const fileInput = document.getElementById('file-input');
-            const playBtn = document.getElementById('play-btn');
-            
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    this.loadAudioFile(file);
-                }
-            });
-            
-            playBtn.addEventListener('click', () => {
-                if (this.isPlaying) {
-                    this.pauseAudio();
-                } else {
-                    this.playAudio();
-                }
-            });
-        }
-        
-        loadAudioFile(file) {
-            if (this.audio) {
-                this.audio.pause();
-                this.audio = null;
-            }
-            
-            this.audio = new Audio();
-            this.audio.src = URL.createObjectURL(file);
-            
-            if (this.audioContext && this.source) {
-                this.source.disconnect();
-            }
-            
-            this.source = this.audioContext.createMediaElementSource(this.audio);
-            this.source.connect(this.analyser);
-            this.analyser.connect(this.audioContext.destination);
-        }
-        
-        playAudio() {
-            if (!this.audio) {
-                alert('Please select an audio file first');
-                return;
-            }
-            
-            if (this.audioContext.state === 'suspended') {
-                this.audioContext.resume();
-            }
-            
-            this.audio.play();
-            this.isPlaying = true;
-            document.getElementById('play-btn').textContent = 'Pause';
-            
-            this.startVisualization();
-        }
-        
-        pauseAudio() {
-            if (!this.audio) return;
-            
-            this.audio.pause();
-            this.isPlaying = false;
-            document.getElementById('play-btn').textContent = 'Play';
-        }
-        
-        startVisualization() {
-            const animate = () => {
-                if (!this.isPlaying) return;
-                
-                requestAnimationFrame(animate);
-                
-                this.analyser.getByteFrequencyData(this.dataArray);
-                
-                // Calculate average frequency
-                const average = this.dataArray.reduce((a, b) => a + b) / this.dataArray.length;
-                
-                // Update beat indicator
-                const beatIndicator = document.getElementById('beat-indicator');
-                if (average > this.settings.beatSensitivity * 255) {
-                    beatIndicator.classList.add('active');
-                    this.triggerFlash();
-                } else {
-                    beatIndicator.classList.remove('active');
-                }
-            };
-            
-            animate();
-        }
-        
-        triggerFlash() {
-            if (this.container.children.length >= this.settings.maxConcurrent) {
-                // Remove oldest flash
-                this.container.removeChild(this.container.firstChild);
-            }
-            
-            const randomImage = this.images[Math.floor(Math.random() * this.images.length)];
-            const flashElement = document.createElement('div');
-            flashElement.className = 'flash-image';
-            flashElement.innerHTML = randomImage.html;
-            flashElement.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-            flashElement.style.top = Math.random() * (window.innerHeight - 200) + 'px';
-            flashElement.style.setProperty('--duration', randomImage.flashDuration + 's');
-            
-            this.container.appendChild(flashElement);
-            
-            // Remove after animation completes
-            setTimeout(() => {
-                if (flashElement.parentNode) {
-                    flashElement.parentNode.removeChild(flashElement);
-                }
-            }, randomImage.flashDuration * 1000);
-        }
+(function () {
+  'use strict';
+
+  var config = null;
+  var audioCtx = null;
+  var analyser = null;
+  var dataArray = null;
+  var source = null;
+  var audioEl = document.getElementById('audio-player');
+  var panels = document.getElementById('panels');
+  var panelLeft = document.getElementById('panel-left');
+  var panelRight = document.getElementById('panel-right');
+
+  var isStarted = false;
+  var isPlaying = false;
+  var leftTurn = true;
+  var lastBeatTime = 0;
+  var beatCooldown = 150;
+  var trackIndex = 0;
+
+  var lastLeftIndex = -1;
+  var lastRightIndex = -1;
+
+  // Make sure gie is available
+  window.gie = window.gie || function (c) {
+    (window.gie.q = window.gie.q || []).push(c);
+  };
+
+  // Load config.json
+  fetch('config.json')
+    .then(function (res) {
+      if (!res.ok) throw new Error('Failed to load config.json: ' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      config = data;
+      console.log('Config loaded. ' + config.images.length + ' images available.');
+    })
+    .catch(function (err) {
+      console.error('Could not load config.json:', err);
+    });
+
+  // Spacebar handler
+  document.addEventListener('keydown', function (e) {
+    if (e.code !== 'Space') return;
+    e.preventDefault();
+
+    if (!config) {
+      console.error('Config not loaded yet.');
+      return;
     }
-    
-    // Initialize visualizer when page loads
-    window.addEventListener('load', () => {
-        new MusicVisualizer();
+
+    if (!isStarted) {
+      startVisualizer();
+    } else if (isPlaying) {
+      pauseVisualizer();
+    } else {
+      resumeVisualizer();
+    }
+  });
+
+  function getRandomIndex(exclude) {
+    var len = config.images.length;
+    if (len <= 1) return 0;
+    var idx;
+    do {
+      idx = Math.floor(Math.random() * len);
+    } while (idx === exclude);
+    return idx;
+  }
+
+  function loadGettyWidget(panelEl, imageObj) {
+    // Clear old content
+    panelEl.innerHTML = '';
+
+    // Create a unique container ID
+    var containerId = 'gie-' + imageObj.id;
+    var container = document.createElement('a');
+    container.id = containerId;
+    container.className = 'gie-single';
+    container.href = 'https://www.gettyimages.com/detail/' + imageObj.items;
+    container.target = '_blank';
+    container.style.cssText = 'color:#a7a7a7;text-decoration:none;font-weight:normal !important;border:none;display:inline-block;width:100%;height:100%;';
+    container.textContent = 'Embed from Getty Images';
+    panelEl.appendChild(container);
+
+    // Use Getty's widget loader
+    gie(function () {
+      gie.widgets.load({
+        id: containerId,
+        sig: imageObj.sig,
+        w: '100%',
+        h: '100%',
+        items: imageObj.items,
+        caption: false,
+        tld: 'com',
+        is360: false
+      });
     });
-    
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        // Adjust any responsive elements if needed
+  }
+
+  function showInitialImages() {
+    var leftIdx = getRandomIndex(-1);
+    var rightIdx = getRandomIndex(leftIdx);
+    lastLeftIndex = leftIdx;
+    lastRightIndex = rightIdx;
+    loadGettyWidget(panelLeft, config.images[leftIdx]);
+    loadGettyWidget(panelRight, config.images[rightIdx]);
+    panels.style.display = 'block';
+  }
+
+  function swapOnBeat() {
+    if (leftTurn) {
+      var newIdx = getRandomIndex(lastLeftIndex);
+      lastLeftIndex = newIdx;
+      loadGettyWidget(panelLeft, config.images[newIdx]);
+    } else {
+      var newIdx = getRandomIndex(lastRightIndex);
+      lastRightIndex = newIdx;
+      loadGettyWidget(panelRight, config.images[newIdx]);
+    }
+    leftTurn = !leftTurn;
+  }
+
+  function startVisualizer() {
+    isStarted = true;
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    source = audioCtx.createMediaElementSource(audioEl);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    audioEl.addEventListener('ended', nextTrack);
+    loadTrack(0);
+
+    showInitialImages();
+    isPlaying = true;
+    beatLoop();
+  }
+
+  function loadTrack(index) {
+    trackIndex = index;
+    var filename = config.playlist[trackIndex];
+    if (!filename || filename.indexOf('..') !== -1 || filename.indexOf('/') !== -1) {
+      console.error('Invalid playlist filename:', filename);
+      return;
+    }
+    audioEl.src = 'audio/' + encodeURIComponent(filename);
+    audioEl.play().catch(function (err) {
+      console.error('Audio play error:', err);
     });
+  }
+
+  function nextTrack() {
+    var next = (trackIndex + 1) % config.playlist.length;
+    loadTrack(next);
+  }
+
+  function pauseVisualizer() {
+    isPlaying = false;
+    audioEl.pause();
+  }
+
+  function resumeVisualizer() {
+    isPlaying = true;
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    audioEl.play().catch(function (err) {
+      console.error('Audio resume error:', err);
+    });
+    beatLoop();
+  }
+
+  function beatLoop() {
+    if (!isPlaying) return;
+    requestAnimationFrame(beatLoop);
+
+    analyser.getByteFrequencyData(dataArray);
+
+    var sum = 0;
+    for (var i = 0; i < dataArray.length; i++) {
+      sum += dataArray[i];
+    }
+    var avg = sum / dataArray.length;
+
+    var now = performance.now();
+    var sensitivity = (config.settings && config.settings.beatSensitivity != null)
+      ? config.settings.beatSensitivity
+      : 0.65;
+
+    if (avg > sensitivity * 255 && (now - lastBeatTime) > beatCooldown) {
+      lastBeatTime = now;
+      swapOnBeat();
+    }
+  }
+})();
 </script>
+
+</body>
+</html>
